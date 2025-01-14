@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DATABASE_URL")
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique 
+  password      String 
+  admin         Boolean @default(false)
+  folders       Folder[] @relation("UserFolders")
+
+  @@map("users")
+}
+
+model Folder {
+  id           Int @id @default(autoincrement())
+  name         String
+  fileType     FileType @default(FOLDER)
+  owner        User @relation("UserFolders", fields: [ownerId], references: [id])
+  ownerId      Int
+  parent       Folder? @relation("ParentFolder", fields: [parentId], references: [id])
+  parentId     Int?
+  subfolders   Folder[] @relation("ParentFolder")
+  files        File[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("folders")
+}
+
+model File {
+  id            Int     @id @default(autoincrement())
+  name          String  
+  filePath    String
+  fileUrl     String
+  displayName String
+  fileType    FileType
+  size        Int
+  Folder      Folder   @relation(fields: [folderId], references: [id])
+  folderId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+
+  @@map("files")
+}
+
+enum FileType {
+  FOLDER
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  OTHER
+}
+
+
+model Session {
+  id          String   @id
+  sid         String   @unique
+  data        String   
+  expiresAt   DateTime
+
+  @@map("sessions")
+}

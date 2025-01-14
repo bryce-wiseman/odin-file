@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin View</title>
+</head>
+<body>
+    <% if(error) { %>
+        <div class="errorMessage">
+            <p>Error: <%= error.message %></p>
+        </div>
+    <% } %>
+
+    <% if(data) { %>
+        <% data.forEach((item) => { %>
+        <div class="dataPiece">
+            <p>ID: <%= item.id %></p>
+            <p>Email: <%= item.email %></p>
+            <p>Password: <%= item.password %></p>
+            <p>Name: <%= item.name %></p>
+            <p>Admin: <%= item.admin %></p>
+        </div>
+    <% })} %>
+</body>
+</html>

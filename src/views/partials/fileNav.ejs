@@ -1,0 +1,29 @@
+<div>
+    <button id="btnOpenNav">Nav</button>
+</div>
+<div>
+    <button>test</button> 
+    <ul>
+        <li><a href="/home">My storage</a></li>
+        <% locals.allFolders.forEach(folder => { %>
+            <% if(folder.name === 'Main') return; %>
+            <li><a href="/home/folder/<%= folder.id %>"><%= folder.name %></a></li>
+        <% }) %>
+    </ul>
+</div>
+<script>
+    const btnNav = document.querySelector('#btnOpenNav');
+
+    const closeBtns = document.querySelectorAll('.closeCont');
+    const navContainer = document.querySelector('.navContainer');
+
+    btnNav.addEventListener('click', () => {
+        navContainer.style.display = 'flex';
+    });
+
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.parentElement.style.display = 'none';
+        });
+    })
+</script>

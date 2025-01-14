@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/style.css"> 
+    <title>Home</title>
+</head>
+<body>
+    <div class="header">
+        <h2><a href="/home">FileBeBack</a></h2>
+        <a href="/logout">Log Out</a>
+    </div>
+    <%- include("partials/feedbackMessage.ejs") %>
+    <div class="mainBody">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="newFileBox">
+                <form action="/home/uploadfile/<%= folderId %>" method="post" enctype="multipart/form-data">
+                    <h3>Upload File</h3>
+                    <input type="file" name="files" id="files" multiple>
+                    <input type="submit" value="Upload" id="uploadFiles">
+                </form>
+            </div>
+            <div class="newFolderBox">
+                <form action="/createFolder/<%= folderId %>" method="post">
+                    <h3>Create Folder</h3>
+                    <label for="foldername">Name:</label>
+                    <input type="text" name="foldername" id="foldername" placeholder="New Folder" required>
+                    <input type="submit" value="Create">
+                </form>
+            </div>
+            <div class="allFoldersBox">
+                <h3>All Folders</h3>
+                <ul class="nav">
+                    <% locals.allFolders.forEach(folder => { %>
+                        <% if(folder.name === 'Main') return; %>
+                        <li class="sidebarFolder"><a href="/home/folder/<%= folder.id %>"><%= folder.name %></a></li>
+                    <% }) %>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MAIN SECTION -->
+        <div class="storageDisplay">
+            <!-- (FOLDER SECTION)-->
+            <div class="foldersContainer">
+                <% locals.subfolders.forEach(folder => { %>
+                    <div class="folder">
+                        <a href="/home/folder/<%= folder.id %>" class="folderLink">
+                            <img src="/icons/open-folder.png" alt="folder" class="folderIMG">
+                            <%= folder.name %>
+                        </a>
+                        <div class="edit">
+                        <!-- Delete -->
+                            <form action="/deleteFolder/<%= folder.id %>" method="post">
+                            <button>
+                                <img src="/icons/delete.png" alt="delete">
+                            </button>
+                            </form>
+                        <!-- Rename -->
+                            <form action="/updateFolderName/<%= folder.id %>" method="post">
+                                <button id="openRename">
+                                    <img src="/icons/rename.png" alt="rename">
+                                </button>
+                                <div id="rename_box" style="display: none;">
+                                    <input type="text" name="newName" id="newName" value="<%= folder.name %>" required>
+                                    <input type="submit" value="Rename">
+                                </div>
+                            </form>
+                        <!-- Update -->
+                            <form action="/updateFolderLocation/<%= folder.id %>" method="post">
+                                <button id="openMove">
+                                    <img src="/icons/move.png" alt="move">
+                                </button>
+                                <div class="move_box" style="display: none;">
+                                    <select name="newParentId" id="newParentId">
+                                    <% locals.allFolders.forEach(fold => { %>
+                                        <% if(fold.id !== folder.id) { %>
+                                        <option value="<%= fold.id %>"><%= fold.name %></option>
+                                            <% } %>
+                                            <%  }); %>
+                                    </select>
+                                    <input type="submit" value="Move">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            <!-- (FILE SECTION) -->
+            <div class="filesContainer">
+                <% locals.files.forEach(file => { %>
+                    <div class="file">
+                        <a href="/home/file/<%= file.id %>" class="folder">
+                            <img src="/icons/<%= file.fileType %>.png" alt="" class="fileIMG">
+                            <%= file.name %>
+                        </a>
+                        <div class="edit">
+                            <!-- Delete -->
+                            <form action="/deleteFile/<%= file.id %>" method="post">
+                                <button>
+                                <img src="/icons/delete.png" alt="delete">
+                            </button>
+                            </form>
+                            <!-- Rename -->
+                            <form action="/updateFileName/<%= file.id %>" method="post">
+                                <button id="openRename">
+                                    <img src="/icons/rename.png" alt="rename">
+                                </button>
+                                <div class="rename_box" style="display: none;">
+                                    <input type="text" name="newFileName" id="newFileName" value="<%= file.name %>" required>
+                                    <input type="submit" value="Rename">
+                                </div>
+                            </form>
+                            <!-- Move -->
+                            <form action="/updateFileLocation/<%= file.id %>" method="post">
+                                <button id="openMove">
+                                    <img src="/icons/move.png" alt="move">
+                                </button>
+                                <div class="move_box" style="display: none;">
+                                    <select name="newFolderId" id="newFolderId">
+                                    <% locals.allFolders.forEach(fold => { %>
+                                        <option value="<%= fold.id %>"><%= fold.name %></option>
+                                    <%  }); %>
+                                    </select>
+                                    <input type="submit" value="Move">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+    <script>
+        const btnRename = document.querySelectorAll('#openRename');
+        const btnMove = document.querySelectorAll('#openMove');
+    
+        const uploadFilesBtn = document.querySelector('#uploadFiles');
+        const uploadingFeedback = document.querySelector('.uploading');
+    
+        const btns = [btnRename, btnMove];
+    
+        uploadFilesBtn.addEventListener('click', () => {
+            uploadFilesBtn.parentElement.style.display = 'none';
+            uploadingFeedback.style.display = 'flex';
+        });
+    
+        function addEvent(element){
+            const sibling = element.nextElementSibling;
+    
+            element.addEventListener('click', (e) => {
+                e.preventDefault();
+    
+                if(sibling.style.display === 'none') {
+                    sibling.style.display = 'block';
+                    return;
+                }
+    
+                sibling.style.display = 'none';
+            });
+        }
+    
+        btns.forEach(btn => {
+            btn.forEach(bt => {addEvent(bt)});
+        });
+     </script>
+</body>
+</html>
